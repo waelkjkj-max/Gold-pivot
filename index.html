@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101722"><title>GOLD PIVOT</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#0c121b;--panel:#151f2c;--line:#29384a;--gold:#e7bd62;--txt:#f2f5f8;--muted:#a9b6c5;--green:#43c995;--red:#ff7474}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#111c2a,#090e15);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:18px 14px 40px}
+.wrap{max-width:760px;margin:auto}.head{text-align:center;margin:8px 0 22px}.logo{font-size:13px;letter-spacing:3px;color:var(--gold);font-weight:800}.head h1{font-size:27px;margin:5px 0}.head p{margin:0;color:var(--muted);font-size:13px}
+.card{background:rgba(21,31,44,.96);border:1px solid var(--line);border-radius:18px;padding:16px;margin:13px 0;box-shadow:0 12px 30px #0003}
+.card h2{font-size:16px;margin:0 0 13px;color:var(--gold)}
+.inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+input{width:100%;background:#0c141e;border:1px solid #334457;color:white;border-radius:11px;padding:13px;font-size:17px;outline:none;direction:ltr;text-align:center}
+input:focus{border-color:var(--gold)}
+button{border:0;border-radius:12px;padding:14px 16px;font-size:15px;font-weight:800;cursor:pointer}
+.primary{width:100%;margin-top:14px;background:linear-gradient(90deg,#c99b3d,#f0d58c);color:#151515}
+.secondary{background:#263548;color:#e8edf3}
+.row{display:flex;gap:9px;align-items:center}.row button{flex:1}
+.error{color:var(--red);font-size:13px;margin-top:9px;display:none}
+.pivotbox{display:flex;justify-content:space-between;align-items:center;background:#0d1722;border:1px solid #34465a;border-radius:13px;padding:13px}
+.pivotbox strong{font-size:23px;color:var(--gold);direction:ltr}
+.bias{font-size:13px;padding:7px 10px;border-radius:20px;background:#263548}
+.bias.up{color:var(--green)}.bias.down{color:var(--red)}
+.levelgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.levelcol{background:#0e1721;border-radius:13px;padding:12px}
+.levelcol h3{margin:0 0 8px;font-size:14px}
+.levelcol.buy h3{color:var(--green)}.levelcol.sell h3{color:var(--red)}
+.level{display:flex;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid #263444;font-size:12px}
+.level:last-child{border:0}.level b{direction:ltr;font-size:13px}
+.small{color:var(--muted);font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{padding:9px 6px;border-bottom:1px solid #2b3949;text-align:center}th{color:var(--gold);font-weight:700}
+.ltr{direction:ltr;unicode-bidi:plaintext}
+.note{font-size:12px;color:var(--muted);line-height:1.7}
+.scenario{padding:13px;border-radius:12px;background:#0d1722;line-height:1.8;font-size:13px}
+footer{text-align:center;color:#718094;font-size:11px;margin:22px 0}
+@media(max-width:390px){.levelgrid{grid-template-columns:1fr}.head h1{font-size:23px}}
+</style></head>
+<body><main class="wrap">
+<header class="head"><div class="logo">XAU / USD</div><h1>GOLD PIVOT</h1><p>حاسبة البيفوت اليومي للذهب — تعمل دون إنترنت</p></header>
+<section class="card">
+<h2>بيانات الشمعة اليومية السابقة</h2>
+<div class="inputs">
+<div><label>أعلى سعر High</label><input id="high" type="number" step="any" inputmode="decimal" placeholder="مثال 4029"></div>
+<div><label>أدنى سعر Low</label><input id="low" type="number" step="any" inputmode="decimal" placeholder="مثال 3977"></div>
+<div><label>الإغلاق Close</label><input id="close" type="number" step="any" inputmode="decimal" placeholder="مثال 4011"></div>
+<div><label>افتتاح اليوم الحالي Open (اختياري)</label><input id="open" type="number" step="any" inputmode="decimal" placeholder="للاتجاه فقط"></div>
+</div>
+<button class="primary" id="calc">احسب مستويات اليوم</button><div class="error" id="error">تأكد من إدخال أرقام صحيحة: الأعلى أكبر من الأدنى والإغلاق ضمن النطاق.</div>
+<div class="row" style="margin-top:9px"><button class="secondary" id="clear">مسح</button><button class="secondary" id="sample">مثال تجريبي</button></div>
+</section>
+<div id="results" style="display:none">
+<section class="card"><h2>المحور الرئيسي والاتجاه الأولي</h2><div class="pivotbox"><div><div class="small">Classic Pivot (P)</div><strong id="pval">—</strong></div><span class="bias" id="bias">—</span></div><p class="note" id="biasnote"></p></section>
+<section class="card"><h2>أقوى مناطق الدعم والمقاومة بالتقارب</h2><div class="levelgrid">
+<div class="levelcol buy"><h3>الدعوم — أسفل السعر</h3><div id="supports"></div></div>
+<div class="levelcol sell"><h3>المقاومات — أعلى السعر</h3><div id="resists"></div></div>
+</div><p class="note">التقارب يعني وجود أكثر من مستوى قريب من بعضه. عدد المصادر يوضح قوة التوافق الحسابي، وليس ضماناً لارتداد السعر.</p></section>
+<section class="card"><h2>Classic Pivot</h2><table><thead><tr><th>المستوى</th><th>السعر</th><th>المستوى</th><th>السعر</th></tr></thead><tbody id="classic"></tbody></table></section>
+<section class="card"><h2>Fibonacci Pivot</h2><table><thead><tr><th>المقاومة</th><th>السعر</th><th>الدعم</th><th>السعر</th></tr></thead><tbody id="fib"></tbody></table></section>
+<section class="card"><h2>Camarilla Pivot</h2><table><thead><tr><th>المقاومة</th><th>السعر</th><th>الدعم</th><th>السعر</th></tr></thead><tbody id="cam"></tbody></table></section>
+<section class="card"><h2>سيناريو التداول المبسط</h2><div class="scenario" id="scenario"></div><p class="note">التأكيد المقترح: إغلاق شمعة 15 دقيقة فوق/تحت المستوى ثم الثبات أو إعادة الاختبار. لا تدخل اعتماداً على لمس المستوى وحده، وحدد وقف الخسارة وحجم المخاطرة مسبقاً.</p></section>
+</div>
+<footer>GOLD PIVOT CALCULATOR · أداة حسابية تعليمية وليست توصية استثمارية</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),fmt=n=>Number(n).toFixed(2);
+function addRows(id,rows){$(id).innerHTML=rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}
+function calculate(){
+ const H=+$('high').value,L=+$('low').value,C=+$('close').value,O=$('open').value===''?null:+$('open').value;
+ const err=!(Number.isFinite(H)&&Number.isFinite(L)&&Number.isFinite(C)&&H>L&&C>=L&&C<=H);
+ $('error').style.display=err?'block':'none';if(err)return;
+ const R=H-L,P=(H+L+C)/3;
+ const classic={R1:2*P-L,R2:P+R,R3:H+2*(P-L),R4:H+3*R,S1:2*P-H,S2:P-R,S3:L-2*(H-P),S4:L-3*R};
+ const fibs=[.382,.618,1,1.382,1.618];
+ const fibR=fibs.map(x=>P+R*x),fibS=fibs.map(x=>P-R*x);
+ const camR=[1,2,3,4].map(k=>C+R*1.1/ (12/k));
+ const camS=[1,2,3,4].map(k=>C-R*1.1/(12/k));
+ $('pval').textContent=fmt(P);
+ let bias='غير محدد',note='أدخل افتتاح اليوم لتحديد الانحياز الأولي.';
+ if(O!==null&&O>0){bias=O>P?'ميل شرائي مبدئي':O<P?'ميل بيعي مبدئي':'الافتتاح عند المحور';note=`الافتتاح ${fmt(O)} ${O>P?'فوق':'تحت'} المحور بمقدار ${fmt(Math.abs(O-P))}. هذا انحياز أولي فقط ويحتاج تأكيد حركة السعر.`}
+ $('bias').textContent=bias;$('bias').className='bias '+(O>P?'up':O<P&&O!==null?'down':'');$('biasnote').textContent=note;
+ const levels=[];
+ Object.entries(classic).forEach(([n,v])=>levels.push({n,v,src:'Classic'}));
+ fibR.forEach((v,i)=>levels.push({n:'Fib R'+(i+1),v,src:'Fibonacci'}));
+ fibS.forEach((v,i)=>levels.push({n:'Fib S'+(i+1),v,src:'Fibonacci'}));
+ camR.forEach((v,i)=>levels.push({n:'Cam R'+(i+1),v,src:'Camarilla'}));
+ camS.forEach((v,i)=>levels.push({n:'Cam S'+(i+1),v,src:'Camarilla'}));
+ // Cluster levels within 0.12% of their mean; merge adjacent candidates.
+ function clusters(arr){
+   arr.sort((a,b)=>a.v-b.v);let groups=[];
+   arr.forEach(x=>{let g=groups[groups.length-1];if(g&&Math.abs(x.v-g.reduce((s,y)=>s+y.v,0)/g.length)/(g.reduce((s,y)=>s+y.v,0)/g.length)<=.0012)g.push(x);else groups.push([x]);});
+   return groups.map(g=>({v:g.reduce((s,x)=>s+x.v,0)/g.length,items:g,score:g.length})).sort((a,b)=>b.score-a.score);
+ }
+ let price=O!==null?O:C;
+ const sup=clusters(levels.filter(x=>x.v<price)),res=clusters(levels.filter(x=>x.v>price));
+ function renderClusters(id,arr,kind){
+  const chosen=arr.slice(0,5).sort((a,b)=>kind==='s'?b.v-a.v:a.v-b.v);
+  $(id).innerHTML=chosen.length?chosen.map(g=>`<div class="level"><span>${g.items.map(x=>x.n).join(' + ')}<br><span class="small">${g.score} مصدر</span></span><b>${fmt(g.v)}</b></div>`).join(''):'<div class="small">لا توجد مستويات بهذا الجانب من السعر</div>';
+ }
+ renderClusters('supports',sup,'s');renderClusters('resists',res,'r');
+ addRows('classic',[[`R4`,fmt(classic.R4),`S4`,fmt(classic.S4)],[`R3`,fmt(classic.R3),`S3`,fmt(classic.S3)],[`R2`,fmt(classic.R2),`S2`,fmt(classic.S2)],[`R1`,fmt(classic.R1),`S1`,fmt(classic.S1)]]);
+ addRows('fib',fibs.map((x,i)=>[`Fib R${i+1}`,fmt(fibR[i]),`Fib S${i+1}`,fmt(fibS[i])]));
+ addRows('cam',camR.map((v,i)=>[`R${i+1}`,fmt(v),`S${i+1}`,fmt(camS[i])]));
+ let scen=O===null?'أدخل افتتاح اليوم ليظهر الميل الأولي. ':O>P?'الافتتاح فوق P: راقب اختراق R1 والثبات فوقه بإغلاق 15 دقيقة، وقد يكون R2 الهدف التالي. كسر P والعودة تحته يضعف السيناريو الشرائي.':O<P?'الافتتاح تحت P: راقب كسر S1 والثبات تحته بإغلاق 15 دقيقة، وقد يكون S2 الهدف التالي. استعادة P والثبات فوقه تضعف السيناريو البيعي.':'الافتتاح عند P: انتظر خروجاً واضحاً من المحور ثم تأكيد إغلاق 15 دقيقة.';
+ $('scenario').textContent=scen;
+ $('results').style.display='block';
+ localStorage.setItem('goldpivot',JSON.stringify({H,L,C,O}));
+}
+$('calc').onclick=calculate;
+$('clear').onclick=()=>{['high','low','close','open'].forEach(x=>$(x).value='');$('results').style.display='none';$('error').style.display='none';localStorage.removeItem('goldpivot')};
+$('sample').onclick=()=>{$('high').value=4029;$('low').value=3977;$('close').value=4011;$('open').value=4008;calculate()};
+try{const s=JSON.parse(localStorage.getItem('goldpivot'));if(s){$('high').value=s.H;$('low').value=s.L;$('close').value=s.C;if(s.O!==null)$('open').value=s.O;calculate()}}catch(e){}
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script></body></html>

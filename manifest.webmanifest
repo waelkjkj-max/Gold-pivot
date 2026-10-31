@@ -1,0 +1,10 @@
+{
+  "name": "GOLD PIVOT Calculator",
+  "short_name": "GOLD PIVOT",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c121b",
+  "theme_color": "#101722",
+  "lang": "ar",
+  "dir": "rtl"
+}
